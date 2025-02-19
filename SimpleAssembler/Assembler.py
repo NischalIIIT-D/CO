@@ -206,3 +206,29 @@ for addr_instruc in range(len(l)):
             lab = y[0]
             label[lab] = addr_instruc
             l[addr_instruc] = [y[1]]+(instrc[1:])
+new_l = [] 
+for instruction in l:
+    if instruction:  
+        new_l.append(instruction) 
+l = new_l
+for index in range(len(l)):
+    instruction = l[index]
+    ins_type = instr_type(instruction[0])
+    if ins_type == "R":
+        s = Rtype_conversion(instruction)
+    elif ins_type == "I":
+        s = Itype_conversion(instruction)
+    elif ins_type == "S":
+        s = Stype_conversion(instruction)
+    elif ins_type == "B":
+        s = Btype_conversion(instruction,index)
+        if instruction == ["beq", "zero,zero,0"]:
+            vir_halt = True
+    elif ins_type == "J":
+        s = Jtype_conversion(instruction,index)
+    else:
+        with open(output_file, mode='w') as f:
+            print(instruction)
+            print("ERROR!! Invalid Instruction name")
+            f.write("ERROR!! Invalid Instruction name")
+        break
