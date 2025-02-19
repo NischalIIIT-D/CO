@@ -72,6 +72,4 @@ def instr_type(instr):
         return "B"
     if instr in J_type:
         return "J"
-    if instr in Bonus_type:
-        return "Bonus"
     return "INVALID"
