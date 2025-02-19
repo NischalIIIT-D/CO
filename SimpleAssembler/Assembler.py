@@ -9,13 +9,11 @@ with open(input_file, 'r') as f:
 with open(output_file, 'w') as f:
     f.write("")
     
-R_type = ["add", "sub","mul", "slt", "sltu", "xor", "sll", "srl", "or", "and"]
-I_type = ["lb", "lh", "lw", "ld", "addi", "sltiu", "jalr"]
-S_type = ["sb", "sh", "sw", "sd"]
-B_type = ["beq", "bne", "bge", "bgeu", "blt", "bltu"]
-U_type = ["auipc", "lui"]
+R_type = ["add", "sub", "slt", "srl", "or", "and"]
+I_type = ["lw", "addi", "jalr"]
+S_type = ["sw"]
+B_type = ["beq", "bne"]
 J_type = ["jal"]
-Bonus_type = ["rst","halt","rvrs"]
 
 label = {}
 
