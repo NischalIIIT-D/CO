@@ -53,3 +53,27 @@ regABItoBinary = {"zero": "00000",
                   "t5": "11110",
                   "t6": "11111",
                   }
+vir_halt = False
+def dec_to_bin(dec_num):
+    if dec_num < -2 ** 31 or dec_num >= 2 ** 31:
+        raise ValueError("Decimal number out of range for 32 bits representation")
+    if dec_num < 0:
+        dec_num = 2 ** 32 + dec_num
+    bin_repr = bin(dec_num)[2:]
+    updated_bin = bin_repr.zfill(32)
+    return str(updated_bin)
+
+def instr_type(instr):
+    if instr in R_type:
+        return "R"
+    if instr in I_type:
+        return "I"
+    if instr in S_type:
+        return "S"
+    if instr in B_type:
+        return "B"
+    if instr in J_type:
+        return "J"
+    if instr in Bonus_type:
+        return "Bonus"
+    return "INVALID"
