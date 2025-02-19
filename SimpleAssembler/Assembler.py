@@ -73,3 +73,27 @@ def instr_type(instr):
     if instr in J_type:
         return "J"
     return "INVALID"
+    def Rtype_conversion(instruction):
+    funct3 = {"add": "000",
+              "sub": "000",
+              "slt": "010",
+              "srl": "101",
+              "or": "110",
+              "and": "111"}
+    opcode = "0110011"
+    temp = instruction[1].split(',')
+    rd = temp[0]
+    rs1 = temp[1]
+    rs2 = temp[2]
+    try:
+        regABItoBinary[rs2]
+        regABItoBinary[rs1]
+        regABItoBinary[rd]
+    except:
+        return -1
+    if instruction[0] == "sub":
+        return (f'0100000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
+                f'{regABItoBinary[rd]}{opcode}')
+    return (f'0000000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
+            f'{regABItoBinary[rd]}{opcode}')
+
