@@ -73,6 +73,7 @@ def instr_type(instr):
     if instr in J_type:
         return "J"
     return "INVALID"
+    
     def Rtype_conversion(instruction):
     funct3 = {"add": "000",
               "sub": "000",
@@ -96,6 +97,7 @@ def instr_type(instr):
                 f'{regABItoBinary[rd]}{opcode}')
     return (f'0000000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
             f'{regABItoBinary[rd]}{opcode}')
+
 def Itype_conversion(instruction):
     funct3 = {"lw": "010",
               "addi": "000",
@@ -132,6 +134,7 @@ def Itype_conversion(instruction):
         imm = temp2[0]
         imm_bin = dec_to_bin(int(imm))
         return f'{imm_bin[20:]}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
+
 def Stype_conversion(instruction):
     opcode = {"sw": "0100011"}
     funct3 = {"sw": "010"}
@@ -148,3 +151,39 @@ def Stype_conversion(instruction):
     imm = temp2[0]
     imm_bin = dec_to_bin(int(imm))
     return f'{imm_bin[20:27]}{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[ins_name]}{imm_bin[27:]}{opcode[ins_name]}'
+
+def Btype_conversion(instruction, index):
+    opcode = "1100011"
+    funct3 = {"beq": "000",
+              "bne": "001",          
+              }
+    ins_name = instruction[0]
+    rs1, rs2, imm = instruction[1].split(',')
+    try:
+        imm_bin = dec_to_bin(int(imm))
+    except:
+        val = label[imm]
+        imm = (val-index)*4
+        imm_bin = dec_to_bin(int(imm))
+    try:
+        regABItoBinary[rs1]
+        regABItoBinary[rs2]
+    except:
+        return -1
+    return (f'{imm_bin[19]}{imm_bin[21:27]}{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[ins_name]}'
+            f'{imm_bin[27:31]}{imm_bin[20]}{opcode}')
+
+def Jtype_conversion(instruction, index):
+    opcode = "1101111"
+    rd,imm = instruction[1].split(',')
+    try:
+        imm_bin = dec_to_bin(int(imm))
+    except:
+        val = label[imm]
+        imm = (val-index)*4
+        imm_bin = dec_to_bin(int(imm))
+    try:
+        regABItoBinary[rd]
+    except:
+        return -1
+    return f'{imm_bin[11]}{imm_bin[21:31]}{imm_bin[20]}{imm_bin[12:20]}{regABItoBinary[rd]}{opcode}'
