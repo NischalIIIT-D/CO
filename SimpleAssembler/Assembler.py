@@ -232,3 +232,23 @@ for index in range(len(l)):
             print("ERROR!! Invalid Instruction name")
             f.write("ERROR!! Invalid Instruction name")
         break
+    if s==-1:
+        with open(output_file, mode='w') as f:
+
+            print("ERROR!!Invalid ABI register name")
+            f.write("ERROR!!Invalid ABI register name")
+        break
+    with open(output_file, mode='a') as f:
+        f.write(s + "\n")
+else:
+    if not vir_halt:
+        with open(output_file, mode='w') as f:
+            print("ERROR!!Virtual Halt not present")
+            f.write("ERROR!!Virtual Halt not present")
+    else:
+        with open(output_file, 'r') as f:
+            l = f.readlines()
+            l[-1] = l[-1].rstrip("\n")
+            s = "".join(l)
+        with open(output_file, 'w') as f:
+            f.write(s)
