@@ -132,3 +132,19 @@ def Itype_conversion(instruction):
         imm = temp2[0]
         imm_bin = dec_to_bin(int(imm))
         return f'{imm_bin[20:]}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
+def Stype_conversion(instruction):
+    opcode = {"sw": "0100011"}
+    funct3 = {"sw": "010"}
+    ins_name = instruction[0]
+    temp = instruction[1].split(',')
+    temp2 = temp[1].split('(')
+    rs2 = temp[0]
+    rs1 = temp2[1].rstrip(')')
+    try:
+        regABItoBinary[rs1]
+        regABItoBinary[rs2]
+    except:
+        return -1
+    imm = temp2[0]
+    imm_bin = dec_to_bin(int(imm))
+    return f'{imm_bin[20:27]}{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[ins_name]}{imm_bin[27:]}{opcode[ins_name]}'
