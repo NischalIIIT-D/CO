@@ -187,3 +187,22 @@ def Jtype_conversion(instruction, index):
     except:
         return -1
     return f'{imm_bin[11]}{imm_bin[21:31]}{imm_bin[20]}{imm_bin[12:20]}{regABItoBinary[rd]}{opcode}'
+
+new_l = [] 
+for instruction in l:
+    if instruction:  
+        new_l.append(instruction) 
+l = new_l
+
+for addr_instruc in range(len(l)):
+    instrc = l[addr_instruc]
+    if ":" in instrc[0]:
+        if len(instrc[0]) - instrc[0].index(":") -1 == 0:
+            lab = instrc[0][:-1]
+            label[lab] = addr_instruc
+            l[addr_instruc] = instrc[1:]
+        else:
+            y = instrc[0].split(":")
+            lab = y[0]
+            label[lab] = addr_instruc
+            l[addr_instruc] = [y[1]]+(instrc[1:])
