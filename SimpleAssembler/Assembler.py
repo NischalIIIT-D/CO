@@ -96,4 +96,39 @@ def instr_type(instr):
                 f'{regABItoBinary[rd]}{opcode}')
     return (f'0000000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
             f'{regABItoBinary[rd]}{opcode}')
+def Itype_conversion(instruction):
+    funct3 = {"lw": "010",
+              "addi": "000",
+              "jalr": "000"
+              }
+    opcode = {"lw": "0000011",
+              "addi": "0010011",
+              "jalr": "1100111"
+              }
+    ins_name = instruction[0]
+    if ins_name == "addi"  or ins_name == "jalr":
+        temp = instruction[1].split(',')
+        rd = temp[0]
+        rs = temp[1]
 
+        try:
+            regABItoBinary[rs]
+            regABItoBinary[rd]
+        except:
+            return -1
+        imm = temp[2]
+        imm_bin = dec_to_bin(int(imm))
+        return f'{imm_bin[20:]}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
+    else:
+        temp = instruction[1].split(',')
+        temp2 = temp[1].split('(')
+        rd = temp[0]
+        rs = temp2[1].rstrip(')')
+        try:
+            regABItoBinary[rs]
+            regABItoBinary[rd]
+        except:
+            return -1
+        imm = temp2[0]
+        imm_bin = dec_to_bin(int(imm))
+        return f'{imm_bin[20:]}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
