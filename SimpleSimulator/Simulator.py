@@ -207,68 +207,55 @@ regs_mappin = {"00000": "00000000000000000000000000000000",
                 "11110": "00000000000000000000000000000000",
                 "11111": "00000000000000000000000000000000",
                 }
+
+def error_hand_instruction(ins):
+    opcode = ins[25:]
+    if opcode not in ["0110011", "0000011", "0010011", "1100111", "0100011", "1100011", "1101111"]:
+        raise ValueError(f"Invalid opcode: {opcode}")
     
+
+def error_hand_pc(pc):
+    if int(pc, 2) % 4 != 0:
+        raise ValueError(f"PC is not a multiple of four: {pc}")
+
+def error_hand_memory_access(address):
+    if address not in mem:
+        raise ValueError(f"Memory access out of bounds: {address}")
+
 def func_R(ins):
     funct7 = ins[0:7]
-    rs2 = regs_mappin[ins[7:12]]
-    rs1 = regs_mappin[ins[12:17]]
+    rs2 = regs_mappin.get(ins[7:12])
+    rs1 = regs_mappin.get(ins[12:17])
     funct3 = ins[17:20]
+    rd = ins[20:25]
+
+    if rs1 is None or rs2 is None or rd not in regs_mappin:
+        raise ValueError(f"Invalid register index in R-type instruction: rs1={ins[12:17]}, rs2={ins[7:12]}, rd={rd}")
 
     if funct7 == "0000000":
         if funct3 == "000":  # add
             rs1_value = b_dec_2s_comp_convert(rs1)
             rs2_value = b_dec_2s_comp_convert(rs2)
             rd_value = rs1_value + rs2_value
-            rd = dec_2s_comp_convert(rd_value) 
-            regs_mappin[ins[20:25]] = rd
-
+            regs_mappin[rd] = dec_2s_comp_convert(rd_value)
         elif funct3 == "010":  # slt
-            if sext(rs1) < sext(rs2):
-                rd = "00000000000000000000000000000001"
-                regs_mappin[ins[20:25]] = rd
-            else:
-                rd = "00000000000000000000000000000000"
-                regs_mappin[ins[20:25]] = rd
+            regs_mappin[rd] = "00000000000000000000000000000001" if sext(rs1) < sext(rs2) else "00000000000000000000000000000000"
         elif funct3 == "101":  # srl
             shift_amount = int(unsigned(rs2)[-5:], 2)
             result = int(rs1, 2) >> shift_amount
-            rd = bin(result & 0xFFFFFFFF)[2:].zfill(32)  
-            regs_mappin[ins[20:25]] = rd
+            regs_mappin[rd] = bin(result & 0xFFFFFFFF)[2:].zfill(32)
         elif funct3 == "110":  # or
-            rd = bitwise_or(rs1, rs2)
-            regs_mappin[ins[20:25]] = rd
+            regs_mappin[rd] = bitwise_or(rs1, rs2)
         elif funct3 == "111":  # and
-            rd = bitwise_and(rs1, rs2)
-            regs_mappin[ins[20:25]] = rd
-    elif funct7 == "0100000":  # sub
-        rs1 = signed(rs1)
-        rs2 = signed(rs2)
-        rd = rs1 - rs2
-        rd = dec_2s_comp_convert(rd)
-        regs_mappin[ins[20:25]] = rd
-def func_I(ins):
-    imm_bin = ins[0:12]
-    rs1 = regs_mappin[ins[12:17]]
-    funct3 = ins[17:20]
-    opcode = ins[25:]
-    global PC
-    if funct3 == "010":  # lw
-        mem_ind = add_2s_comp(rs1, sext(imm_bin))
-        mem_ind = b_hex_conv(mem_ind)
-        mem_ind = "0x" + mem_ind
-        rd = mem[mem_ind]
-        regs_mappin[ins[20:25]] = rd
-        PC = add_2s_comp(PC, "100")
-    elif funct3 == "000" and opcode == "0010011":  # addi
-        imm_extended = sext(imm_bin)  
-        rd = add_2s_comp(rs1, imm_extended)  
-        regs_mappin[ins[20:25]] = rd
-        PC = add_2s_comp(PC, "100")
-    elif funct3 == "000":  # jalr
-        rd = add_2s_comp(PC, unsigned("100"))  
-        PC = add_2s_comp(rs1, sext(imm_bin))
-        PC = PC[:-1] + "0"
-        regs_mappin[ins[20:25]] = rd
+            regs_mappin[rd] = bitwise_and(rs1, rs2)
+        else:
+            raise ValueError(f"Invalid funct3 for R-type instruction: {funct3}")
+    elif funct7 == "0100000" and funct3 == "000":  # sub
+        rs1_value = signed(rs1)
+        rs2_value = signed(rs2)
+        regs_mappin[rd] = dec_2s_comp_convert(rs1_value - rs2_value)
+    else:
+        raise ValueError(f"Invalid funct7 or funct3 for R-type instruction: funct7={funct7}, funct3={funct3}")
 
 def func_S(ins):
 
