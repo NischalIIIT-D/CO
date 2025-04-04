@@ -247,4 +247,37 @@ def b_hex_conv(bin_str):
 
     hex_str = ''.join(hexdig)
     return hex_str
+def func_I(ins):
+    imm_bin = ins[0:12]
+    rs1 = regs_mappin[ins[12:17]]
+    funct3 = ins[17:20]
+    opcode = ins[25:]
+    global PC
+    if funct3 == "010":  # lw
+        mem_ind = add_2s_comp(rs1, sext(imm_bin))
+        mem_ind = b_hex_conv(mem_ind)
+        mem_ind = "0x" + mem_ind
+        rd = mem[mem_ind]
+        regs_mappin[ins[20:25]] = rd
+        PC = add_2s_comp(PC, "100")
+    elif funct3 == "000" and opcode == "0010011":  # addi
+        imm_extended = sext(imm_bin)  
+        rd = add_2s_comp(rs1, imm_extended)  
+        regs_mappin[ins[20:25]] = rd
+        PC = add_2s_comp(PC, "100")
+    elif funct3 == "000":  # jalr
+        rd = add_2s_comp(PC, unsigned("100"))  
+        PC = add_2s_comp(rs1, sext(imm_bin))
+        PC = PC[:-1] + "0"
+        regs_mappin[ins[20:25]] = rd
 
+def func_S(ins):
+
+    imm_bin = ins[0:7] + ins[20:25]
+    rs2 = regs_mappin[ins[7:12]]
+    rs1 = regs_mappin[ins[12:17]]
+    funct3 = ins[17:20]
+    mem_ind = add_2s_comp(rs1, sext(imm_bin))
+    mem_ind = b_hex_conv(mem_ind)
+    mem_ind = "0x" + mem_ind
+    mem[mem_ind] = rs2
