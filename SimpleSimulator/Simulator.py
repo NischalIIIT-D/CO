@@ -280,3 +280,62 @@ def func_S(ins):
     mem_ind = b_hex_conv(mem_ind)
     mem_ind = "0x" + mem_ind
     mem[mem_ind] = rs2
+def func_B(ins):
+    global PC
+    imm_bin = ins[0] + ins[24] + ins[1:7] + ins[20:24]
+    rs2 = regs_mappin[ins[7:12]]
+    rs1 = regs_mappin[ins[12:17]]
+    funct3 = ins[17:20]
+    if funct3 == "000":  # beq
+        if rs1 == rs2:
+            PC = add_2s_comp(PC, sext(imm_bin + "0"))
+        else:
+            PC = add_2s_comp(PC, "100")
+    elif funct3 == "001":  # bne
+        if rs1 != rs2:
+            PC = add_2s_comp(PC, sext(imm_bin + "0"))
+        else:
+            PC = add_2s_comp(PC, "100")
+
+def func_J(ins):
+    global PC
+    imm = ins[0] + ins[12:20] + ins[11] + ins[1:11]
+    imm = sext(imm + "0")
+    rd = add_2s_comp(PC, unsigned("100")) 
+    PC = add_2s_comp(PC, imm)
+    PC = PC[:-1] + "0"
+    regs_mappin[ins[20:25]] = rd
+
+l = dict()
+for i in range(len(li)):
+    l[dec_ubin_convert(i * 4)] = li[i]
+
+with open(op_file, 'w') as f:
+    f.write("")
+while True:
+    ins = l[PC]
+    ins_type = instruc_type(ins)
+    if ins_type == "R":
+        func_R(ins)
+        PC = add_2s_comp(PC, "100")
+    elif ins_type == "I":
+        func_I(ins)
+    elif ins_type == "S":
+        func_S(ins)
+        PC = add_2s_comp(PC, "100")
+    elif ins_type == "B":
+        func_B(ins)
+    elif ins_type == "J":
+        func_J(ins)
+    regs_mappin["00000"] = "00000000000000000000000000000000"
+    with open(op_file, 'a') as f:
+        f.write("0b" + PC + " ")
+        for key, value in regs_mappin.items():
+            f.write("0b" + value + " ")
+        f.write("\n")
+    if ins == "00000000000000000000000001100011" or ins =="00000000000000000000000000000000":
+        # halt
+        break
+with open(op_file, 'a') as f:
+    for key, value in mem.items():
+        f.write(key + ":0b" + value + "\n")
