@@ -95,46 +95,6 @@ regs_mappin = {"00000": "00000000000000000000000000000000",
                 "11111": "00000000000000000000000000000000",
                 }
 
-
-def func_R(ins):
-    funct7 = ins[0:7]
-    rs2 = regs_mappin[ins[7:12]]
-    rs1 = regs_mappin[ins[12:17]]
-    funct3 = ins[17:20]
-
-    if funct7 == "0000000":
-        if funct3 == "000":  # add
-            rs1_value = b_dec_2s_comp_convert(rs1)
-            rs2_value = b_dec_2s_comp_convert(rs2)
-            rd_value = rs1_value + rs2_value
-            rd = dec_2s_comp_convert(rd_value) 
-            regs_mappin[ins[20:25]] = rd
-
-        elif funct3 == "010":  # slt
-            if sext(rs1) < sext(rs2):
-                rd = "00000000000000000000000000000001"
-                regs_mappin[ins[20:25]] = rd
-            else:
-                rd = "00000000000000000000000000000000"
-                regs_mappin[ins[20:25]] = rd
-        elif funct3 == "101":  # srl
-            shift_amount = int(unsigned(rs2)[-5:], 2)
-            result = int(rs1, 2) >> shift_amount
-            rd = bin(result & 0xFFFFFFFF)[2:].zfill(32)  
-            regs_mappin[ins[20:25]] = rd
-        elif funct3 == "110":  # or
-            rd = bitwise_or(rs1, rs2)
-            regs_mappin[ins[20:25]] = rd
-        elif funct3 == "111":  # and
-            rd = bitwise_and(rs1, rs2)
-            regs_mappin[ins[20:25]] = rd
-    elif funct7 == "0100000":  # sub
-        rs1 = signed(rs1)
-        rs2 = signed(rs2)
-        rd = rs1 - rs2
-        rd = dec_2s_comp_convert(rd)
-        regs_mappin[ins[20:25]] = rd
-
 def dec_2s_comp_convert(num_dec):
     bin_Str = bin(abs(num_dec) & 0xFFFFFFFF)[2:].zfill(32)
     inv_str = ''
@@ -247,6 +207,45 @@ def b_hex_conv(bin_str):
 
     hex_str = ''.join(hexdig)
     return hex_str
+    
+def func_R(ins):
+    funct7 = ins[0:7]
+    rs2 = regs_mappin[ins[7:12]]
+    rs1 = regs_mappin[ins[12:17]]
+    funct3 = ins[17:20]
+
+    if funct7 == "0000000":
+        if funct3 == "000":  # add
+            rs1_value = b_dec_2s_comp_convert(rs1)
+            rs2_value = b_dec_2s_comp_convert(rs2)
+            rd_value = rs1_value + rs2_value
+            rd = dec_2s_comp_convert(rd_value) 
+            regs_mappin[ins[20:25]] = rd
+
+        elif funct3 == "010":  # slt
+            if sext(rs1) < sext(rs2):
+                rd = "00000000000000000000000000000001"
+                regs_mappin[ins[20:25]] = rd
+            else:
+                rd = "00000000000000000000000000000000"
+                regs_mappin[ins[20:25]] = rd
+        elif funct3 == "101":  # srl
+            shift_amount = int(unsigned(rs2)[-5:], 2)
+            result = int(rs1, 2) >> shift_amount
+            rd = bin(result & 0xFFFFFFFF)[2:].zfill(32)  
+            regs_mappin[ins[20:25]] = rd
+        elif funct3 == "110":  # or
+            rd = bitwise_or(rs1, rs2)
+            regs_mappin[ins[20:25]] = rd
+        elif funct3 == "111":  # and
+            rd = bitwise_and(rs1, rs2)
+            regs_mappin[ins[20:25]] = rd
+    elif funct7 == "0100000":  # sub
+        rs1 = signed(rs1)
+        rs2 = signed(rs2)
+        rd = rs1 - rs2
+        rd = dec_2s_comp_convert(rd)
+        regs_mappin[ins[20:25]] = rd
 def func_I(ins):
     imm_bin = ins[0:12]
     rs1 = regs_mappin[ins[12:17]]
