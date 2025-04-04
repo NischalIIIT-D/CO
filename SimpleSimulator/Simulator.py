@@ -257,16 +257,57 @@ def func_R(ins):
     else:
         raise ValueError(f"Invalid funct7 or funct3 for R-type instruction: funct7={funct7}, funct3={funct3}")
 
-def func_S(ins):
-
-    imm_bin = ins[0:7] + ins[20:25]
-    rs2 = regs_mappin[ins[7:12]]
-    rs1 = regs_mappin[ins[12:17]]
+def func_I(ins):
+    imm_bin = ins[0:12]
+    rs1 = regs_mappin.get(ins[12:17])
     funct3 = ins[17:20]
+    opcode = ins[25:]
+    rd = ins[20:25]
+    global PC
+    if rs1 is None or rd not in regs_mappin:
+        raise ValueError(f"Invalid register index in I-type instruction: rs1={ins[12:17]}, rd={rd}")
+
+    if funct3 == "010":  # lw
+        mem_ind = add_2s_comp(rs1, sext(imm_bin))
+        mem_ind = b_hex_conv(mem_ind)
+        mem_ind = "0x" + mem_ind
+        error_hand_memory_access(mem_ind)
+        rd_value = mem[mem_ind]
+        regs_mappin[rd] = rd_value
+        PC = add_2s_comp(PC, "100")
+    elif funct3 == "000" and opcode == "0010011":  # addi
+        imm_extended = sext(imm_bin)
+        rd_value = add_2s_comp(rs1, imm_extended)
+        regs_mappin[rd] = rd_value
+        PC = add_2s_comp(PC, "100")
+    elif funct3 == "000":  # jalr
+        rd_value = add_2s_comp(PC, unsigned("100"))
+        PC = add_2s_comp(rs1, sext(imm_bin))
+        PC = PC[:-1] + "0"
+        error_hand_pc(PC)  
+        regs_mappin[rd] = rd_value
+    else:
+        raise ValueError(f"Invalid funct3 for I-type instruction: {funct3}")
+
+
+
+def func_S(ins):
+    imm_bin = ins[0:7] + ins[20:25]
+    rs2 = regs_mappin.get(ins[7:12])
+    rs1 = regs_mappin.get(ins[12:17])
+    funct3 = ins[17:20]
+
+    if rs1 is None or rs2 is None:
+        raise ValueError(f"Invalid register index in S-type instruction: rs1={ins[12:17]}, rs2={ins[7:12]}")
+
     mem_ind = add_2s_comp(rs1, sext(imm_bin))
     mem_ind = b_hex_conv(mem_ind)
     mem_ind = "0x" + mem_ind
-    mem[mem_ind] = rs2
+    error_hand_memory_access(mem_ind) 
+    if funct3 == "010":  # sw
+        mem[mem_ind] = rs2
+    else:
+        raise ValueError(f"Invalid funct3 for S-type instruction: {funct3}")
 def func_B(ins):
     global PC
     imm_bin = ins[0] + ins[24] + ins[1:7] + ins[20:24]
