@@ -247,3 +247,4 @@ def b_hex_conv(bin_str):
 
     hex_str = ''.join(hexdig)
     return hex_str
+
